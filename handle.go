@@ -131,6 +131,33 @@ func CardCtx(next http.Handler) http.Handler {
 	})
 }
 
+// CreateCard creates card
+func CreateCard(w http.ResponseWriter, r *http.Request) {
+	data := &CardRequest{}
+	if err := render.Bind(r, data); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+	}
+
+	db.Create(data.Card)
+
+	render.Status(r, http.StatusCreated)
+	render.Render(w, r, NewCardResponse(data.Card))
+}
+
+func ListCards(w http.ResponseWriter, r *http.Request) {
+	var cards []*Card
+	result := db.Find(&cards)
+	if result.Error != nil {
+		render.Render(w, r, ErrInternal(result.Error))
+		return
+	}
+
+	if err := render.RenderList(w, r, NewCardListResponse(cards)); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+}
+
 // GetCard returns the specific Card. You'll notice it just
 // fetches the Card right off the context, as its understood that
 // if we made it this far, the Card must be on the context. In case
