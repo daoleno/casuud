@@ -1,11 +1,15 @@
 package main
 
+import "gorm.io/gorm"
+
 type Group struct {
-	Name string `json:"name"`
+	gorm.Model
+	Name  string `json:"name"`
+	Cards []Card `json:"cards"`
 }
 
 type Card struct {
-	ID    string `json:"id"`
+	gorm.Model
 	Front string `json:"front"`
 	Back  string `json:"back"`
 }

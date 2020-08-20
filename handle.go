@@ -73,7 +73,8 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 type CardRequest struct {
-	*Card
+	*Card     `json:"card"`
+	GroupName string `json:"group_name"`
 }
 
 func (g *CardRequest) Bind(r *http.Request) error {
@@ -144,11 +145,18 @@ func CreateCard(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, NewCardResponse(data.Card))
 }
 
+// ListCards list all cards
 func ListCards(w http.ResponseWriter, r *http.Request) {
 	var cards []*Card
-	result := db.Find(&cards)
-	if result.Error != nil {
-		render.Render(w, r, ErrInternal(result.Error))
+	var group *Group
+	if groupName := chi.URLParam(r, "groupName"); groupName != "" {
+		err := db.Model(&group).Where("name = ?", groupName).Association("cards").Find(&cards)
+		if err != nil {
+			render.Render(w, r, ErrNotFound)
+			return
+		}
+	} else {
+		render.Render(w, r, ErrNotFound)
 		return
 	}
 

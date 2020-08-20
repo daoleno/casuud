@@ -49,6 +49,7 @@ func main() {
 	r.Route("/group", func(r chi.Router) {
 		r.Get("/", ListGroups)
 		r.Post("/", CreateGroup)
+		r.Post("/{groupName}", ListCards)
 	})
 
 	r.Route("/card", func(r chi.Router) {
